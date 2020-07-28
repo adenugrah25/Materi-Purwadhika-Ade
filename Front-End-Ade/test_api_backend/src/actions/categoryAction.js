@@ -11,7 +11,7 @@ export const getCategory = () => {
   return async (dispatch) => {
     try {
       //get data from API
-      const res = await Axios.get(URL + `/category`);
+      const res = await Axios.get(URL + `/category/details`);
       //dispatch memanggil action (yg akan dibaca reducer)
       dispatch({ type: GET_CATEGORY, payload: res.data });
     } catch (err) {
@@ -19,3 +19,19 @@ export const getCategory = () => {
     }
   };
 };
+
+export const addCategory = (body) => {
+  return async (dispatch) => {
+    try {
+      //add data to database
+      const res = await Axios.post(URL + '/category/add', body);
+      console.log(res.data)
+
+      // get data from database
+      const response = await Axios.get(URL + "/category/details");
+      dispatch({ type: GET_CATEGORY, payload: response.data });
+    } catch (err) {
+      console.log(err);
+    } 
+  }
+}

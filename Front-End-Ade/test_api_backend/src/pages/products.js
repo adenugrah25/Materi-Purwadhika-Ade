@@ -19,7 +19,7 @@ class Product extends React.Component {
   }
 
   handleAdd = () => {
-    console.log("handleAdd function :");
+    // console.log("handleAdd function :");
     console.log(`refs handleAdd:`, this.refs);
 
     //get value

@@ -1,14 +1,15 @@
 import React from "react";
 // import Axios from "axios";
-import { Table, Button, InputGroup, FormControl } from "react-bootstrap";
+import { Table, Button, InputGroup, FormControl, Form } from "react-bootstrap";
 import { connect } from "react-redux";
-import { getCategory } from "../actions"; //action for get data
+import { getCategory, addCategory } from "../actions"; //action for get data
 
 class Category extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       category: [],
+      selectedIndex : null
     };
   }
 
@@ -23,7 +24,20 @@ class Category extends React.Component {
     // } catch (err) {
     //   console.log(err);
     // }
-    this.props.getCategory() //cuma pakai getCategory karena di dlm getCategory sudah dilakukan Axios (di categoryAction.js)
+    this.props.getCategory(); //cuma pakai getCategory karena di dlm getCategory sudah dilakukan Axios (di categoryAction.js)
+  }
+
+  handleAdd = () => {
+    console.log(`refs handleAdd:`, this.refs)
+
+    // let valueCat = this.refs.addcategory.value;
+    // let parentCat = this.refs.idparentcategory.value;
+    const body = {
+      category : this.refs.addcategory.value,
+      parentId : this.refs.idparentcategory.value
+    }
+    console.log(`categoy :`,body.category , `parent ID Category :`,body.parentId)
+    this.props.addCategory(body);
   }
 
   TableHead = () => {
@@ -33,7 +47,7 @@ class Category extends React.Component {
           {/* <th>No</th> */}
           <th>ID</th>
           <th>Category</th>
-          <th>Parent-ID</th>
+          <th>Parent</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -48,9 +62,9 @@ class Category extends React.Component {
           {/* <td>{index + 1}</td> */}
           <td>{item.id}</td>
           <td>{item.category}</td>
-          <td>{item.parent_id}</td>
+          <td>{item.parent}</td>
           <td>
-            <Button variant="secondary">Edit</Button>{" "}
+            <Button variant="secondary">Edit</Button>
             <Button variant="danger">Delete</Button>
           </td>
         </tr>
@@ -81,6 +95,17 @@ class Category extends React.Component {
                 </InputGroup>
               </td>
               <td>
+                <Form.Group controlId="exampleForm.ControlSelect1">
+                  <Form.Control as="select" ref="idparentcategory">
+                    {this.props.category.map((item, index) => {
+                      return (
+                        <option key={item.id} value={item.id}>{item.category}</option>
+                      )
+                    })}
+                  </Form.Control>
+                </Form.Group>
+              </td>
+              <td>
                 <Button variant="primary" onClick={this.handleAdd}>
                   Add
                 </Button>
@@ -100,4 +125,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, { getCategory })(Category);
+export default connect(mapStateToProps, { getCategory, addCategory })(Category);
