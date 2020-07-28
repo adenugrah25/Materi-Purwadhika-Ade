@@ -7,11 +7,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 // import * as serviceWorker from './serviceWorker';
 
 //setup redux
-import { createStore } from "redux";
+import { createStore, applyMiddleware } from "redux";
 import { Provider } from "react-redux";
+import ReduxThunk from 'redux-thunk';
 import Reducers from "./reducers";
 
-const globalStore = createStore(Reducers)
+const globalStore = createStore(Reducers, {}, applyMiddleware(ReduxThunk))
 globalStore.subscribe(() => console.log('global store : ', globalStore.getState()))
 
 ReactDOM.render(

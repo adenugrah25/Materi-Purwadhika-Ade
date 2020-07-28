@@ -1,5 +1,5 @@
 import React from "react";
-import Axios from "axios";
+// import Axios from "axios";
 import { Table, Button, InputGroup, FormControl } from "react-bootstrap";
 import { connect } from "react-redux";
 import { getCategory } from "../actions"; //action for get data
@@ -14,15 +14,16 @@ class Category extends React.Component {
 
   async componentDidMount() {
     console.log("component did mount");
-    //fetch category data
-    try {
-      const res = await Axios.get("http://localhost:2000/api/category");
-      // this.setState({ category : res.data })
-      console.log(`check res data :`, res.data);
-      this.props.getCategory(res.data);
-    } catch (err) {
-      console.log(err);
-    }
+    // //fetch category data
+    // try {
+    //   const res = await Axios.get("http://localhost:2000/api/category");
+    //   // this.setState({ category : res.data })
+    //   console.log(`check res data :`, res.data);
+    //   this.props.getCategory(res.data);
+    // } catch (err) {
+    //   console.log(err);
+    // }
+    this.props.getCategory() //cuma pakai getCategory karena di dlm getCategory sudah dilakukan Axios (di categoryAction.js)
   }
 
   TableHead = () => {

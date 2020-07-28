@@ -59,6 +59,7 @@ module.exports = {
   },
   deleteProduct: async (req, res) => {
     const id = parseInt(req.params.id);
+    console.log(req.params.id)
     try {
       // check if product with id exist in our database
       const checkProduct = `SELECT * FROM products WHERE id=${id}`;
@@ -73,6 +74,7 @@ module.exports = {
       // send response
       res.status(200).send(result);
     } catch (err) {
+      console.log(err)
       res.status(500).send(err);
     }
   },

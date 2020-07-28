@@ -1,9 +1,9 @@
 import React from "react";
-import Axios from "axios";
+// import Axios from "axios";
 import { connect } from 'react-redux'
 import { Table, Button, InputGroup, FormControl } from "react-bootstrap";
 
-import { getProduct } from '../actions' //action for get data
+import { getProduct, URL, addProduct, deleteProduct } from '../actions' //action for get data
 
 class Product extends React.Component {
   constructor(props) {
@@ -14,19 +14,54 @@ class Product extends React.Component {
   }
   async componentDidMount() {
     console.log("component did mount");
-    //fetch product data
-    try {
-      const res = await Axios.get("http://localhost:2000/api/products"); //alamat axiosnya sesuaikan dgn alamat yg dibuat
-      // this.setState({ product: res.data });
-      console.log(`check res data :`,res.data)
-      this.props.getProduct(res.data)
-    } catch (err) {
-      console.log(err);
-    }
+    this.props.getProduct() //cuma pakai getProduct karena di dlm getProduct sudah dilakukan Axios (di productAction.js)
   }
 
   handleAdd = () => {
     console.log('handleAdd function :',)
+    console.log(`refs handleAdd:`, this.refs)
+
+    //get value
+    // let name  = this.refs.name.value;
+    // let price = parseInt(this.refs.price.value);
+    // let stock = parseInt(this.refs.stock.value);
+
+    const body = { 
+      name  : this.refs.name.value,
+      price : parseInt(this.refs.price.value),
+      stock : parseInt(this.refs.stock.value)
+    }
+    //masukin datanya ke addProduct
+    this.props.addProduct(body)
+    // try {
+    //   //send data to API
+    //   const res = await Axios.post(URL + '/products/add', { name, price, stock })
+    //   console.log(res.data)
+      
+    //   //get data from API
+    //   const response = await Axios.get(URL + '/products/')
+    //   this.props.getProduct(response.data)
+    // } catch (err) {
+    //   console.log(err)
+    // }
+  }
+
+  //ketika ngedelete butuh id untuk menandakan yg mana yg akan didelete, makanya diberikan id & id != index
+  handleDelete = (id) => {
+    console.log('delete id : ', id) //console log buat ngetes fungsi
+    // try {
+    //   //delete data from API
+    //   const res = await Axios.delete(URL + `/products/delete/${id}`) //tdk perlu di parseInt karena di backend sudah dilakukan
+    //   console.log(res.data)
+
+    //   //get data from API
+    //   const response = await Axios.get(URL + `/products`)
+    //   //refresh redux
+    //   this.props.getProduct(response.data)
+    // } catch (err) {
+    //   console.log(err)
+    // }
+    this.props.deleteProduct(id)
   }
 
   TableHead = () => {
@@ -38,7 +73,6 @@ class Product extends React.Component {
           <th>Price</th>
           <th>Stock</th>
           <th>Action</th>
-          
         </tr>
       </thead>
     );
@@ -47,7 +81,7 @@ class Product extends React.Component {
   TableBody = () => {
     return this.props.product.map((item, index) => {
       return (
-        //dikasih key sebagai unique identityyy
+        //dikasih key sebagai unique identity
         <tr key={item.id}>
           <td>{index + 1}</td>
           <td>{item.name}</td>
@@ -55,7 +89,7 @@ class Product extends React.Component {
           <td>{item.stock}</td>
           <td>
             <Button variant="secondary">Edit</Button>
-            <Button variant="danger">Delete</Button>
+            <Button variant="danger" onClick={() => this.handleDelete(item.id)}>Delete</Button>
           </td>
         </tr>
       );
@@ -88,9 +122,11 @@ class Product extends React.Component {
                 <InputGroup>
                   <FormControl
                     placeholder="Price"
+                    className="input"
                     aria-label="Price"
                     ref="price"
                     aria-describedby="basic-addon1"
+                    type="number"
                   />
                 </InputGroup>
               </td>
@@ -101,6 +137,8 @@ class Product extends React.Component {
                     aria-label="Stock"
                     ref="stock"
                     aria-describedby="basic-addon1"
+                    className="input"
+                    type="number"
                   />
                 </InputGroup>
               </td>
@@ -125,4 +163,4 @@ const mapStateToProps = (state) => {
   
 }
 
-export default connect(mapStateToProps, {getProduct})(Product);
+export default connect(mapStateToProps, {getProduct, addProduct, deleteProduct})(Product);
