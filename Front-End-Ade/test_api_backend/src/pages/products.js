@@ -47,7 +47,7 @@ class Product extends React.Component {
   TableBody = () => {
     return this.props.product.map((item, index) => {
       return (
-        //dikasih key sebagai unique identity
+        //dikasih key sebagai unique identityyy
         <tr key={item.id}>
           <td>{index + 1}</td>
           <td>{item.name}</td>
