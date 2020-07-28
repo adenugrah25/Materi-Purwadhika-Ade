@@ -51,3 +51,19 @@ export const deleteProduct = (id) => {
     }
   };
 };
+
+export const editProduct = (id, body) => {
+  return async (dispatch) => {
+    try {
+      //edit data
+      const res = await Axios.patch(URL + `/products/edit/${id}`, body)
+      console.log(res.data)
+
+      // get data from database
+      const response = await Axios.get(URL + "/products/");
+      dispatch({ type: GET_PRODUCT, payload: response.data });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+}
