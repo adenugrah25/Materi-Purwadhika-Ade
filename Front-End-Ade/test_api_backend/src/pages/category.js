@@ -2,14 +2,14 @@ import React from "react";
 // import Axios from "axios";
 import { Table, Button, InputGroup, FormControl, Form } from "react-bootstrap";
 import { connect } from "react-redux";
-import { getCategory, addCategory } from "../actions"; //action for get data
+import { getCategory, addCategory, editCategory, deleteCategory } from "../actions"; //action for get data
 
 class Category extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       category: [],
-      selectedIndex : null
+      selectedIndex: null,
     };
   }
 
@@ -28,17 +28,39 @@ class Category extends React.Component {
   }
 
   handleAdd = () => {
-    console.log(`refs handleAdd:`, this.refs)
+    console.log(`refs handleAdd:`, this.refs);
 
     // let valueCat = this.refs.addcategory.value;
     // let parentCat = this.refs.idparentcategory.value;
     const body = {
-      category : this.refs.addcategory.value,
-      parentId : this.refs.idparentcategory.value
-    }
-    console.log(`categoy :`,body.category , `parent ID Category :`,body.parentId)
+      category: this.refs.addcategory.value,
+      parentId: this.refs.idparentcategory.value,
+    };
+    console.log(
+      `categoy :`,
+      body.category,
+      `parent ID Category :`,
+      body.parentId
+    );
     this.props.addCategory(body);
-  }
+  };
+
+  handleSave = (id) => {
+    console.log("handleSave id: ", id);
+    const body = {
+      category: this.refs.addeditcategory.value,
+      parent_id: this.refs.editidparentcategory.value,
+    };
+    this.props.editCategory(id, body);
+    this.setState({ selectedIndex: null });
+    this.refs.addeditcategory.value = "";
+    this.refs.editidparentcategory.value = "";
+  };
+
+  handleDelete = (id) => {
+    console.log("id : ", id);
+    this.props.deleteCategory(id);
+  };
 
   TableHead = () => {
     return (
@@ -56,19 +78,62 @@ class Category extends React.Component {
 
   TableBody = () => {
     return this.props.category.map((item, index) => {
-      return (
-        //dikasih key sebagai unique identity
-        <tr key={item.id}>
-          {/* <td>{index + 1}</td> */}
-          <td>{item.id}</td>
-          <td>{item.category}</td>
-          <td>{item.parent}</td>
-          <td>
-            <Button variant="secondary">Edit</Button>
-            <Button variant="danger">Delete</Button>
-          </td>
-        </tr>
-      );
+      if (this.state.selectedIndex === index) {
+        return (
+          <tr key={item.id}>
+            <td></td>
+            <td>
+              <FormControl
+                placeholder="Category"
+                aria-label="Category"
+                ref="addeditcategory"
+                aria-describedby="basic-addon1"
+              />
+            </td>
+            <td>
+              <Form.Control as="select" ref="editidparentcategory">
+                {this.props.category.map((item, index) => {
+                  return (
+                    <option key={item.id} value={item.id}>
+                      {item.category}
+                    </option>
+                  );
+                })}
+              </Form.Control>
+            </td>
+            <td>
+              <Button variant="info" onClick={() => this.handleSave(item.id)}>
+                Save
+              </Button>
+              <Button
+                variant="success"
+                onClick={() => this.setState({ selectedIndex: null })}
+              >
+                Cancel
+              </Button>
+            </td>
+          </tr>
+        );
+      } else {
+        return (
+          //dikasih key sebagai unique identity
+          <tr key={item.id}>
+            {/* <td>{index + 1}</td> */}
+            <td>{item.id}</td>
+            <td>{item.category}</td>
+            <td>{item.parent}</td>
+            <td>
+              <Button
+                variant="secondary"
+                onClick={() => this.setState({ selectedIndex: index })}
+              >
+                Edit
+              </Button>
+              <Button variant="danger" onClick={() => this.handleDelete(item.id)}>Delete</Button>
+            </td>
+          </tr>
+        );
+      }
     });
   };
 
@@ -84,7 +149,6 @@ class Category extends React.Component {
             <tr>
               <td></td>
               <td>
-                {" "}
                 <InputGroup>
                   <FormControl
                     placeholder="Category"
@@ -99,8 +163,10 @@ class Category extends React.Component {
                   <Form.Control as="select" ref="idparentcategory">
                     {this.props.category.map((item, index) => {
                       return (
-                        <option key={item.id} value={item.id}>{item.category}</option>
-                      )
+                        <option key={item.id} value={item.id}>
+                          {item.category}
+                        </option>
+                      );
                     })}
                   </Form.Control>
                 </Form.Group>
@@ -125,4 +191,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, { getCategory, addCategory })(Category);
+export default connect(mapStateToProps, {
+  getCategory,
+  addCategory,
+  editCategory,
+  deleteCategory
+})(Category);

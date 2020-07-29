@@ -3,7 +3,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { Table, Button, InputGroup, FormControl } from "react-bootstrap";
 
-import { getProduct, URL, addProduct, deleteProduct, editProduct } from "../actions"; //action for get data
+import { getProduct, addProduct, deleteProduct, editProduct } from "../actions"; //action for get data
 
 class Product extends React.Component {
   constructor(props) {
@@ -76,6 +76,9 @@ class Product extends React.Component {
     };
     this.props.editProduct(id, body)
     this.setState({ selectedIndex : null })
+    this.refs.editname.value = ''
+    this.refs.editprice.value = ''
+    this.refs.editstock.value = ''
   }
 
   TableHead = () => {
