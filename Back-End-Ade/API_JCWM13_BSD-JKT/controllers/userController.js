@@ -33,7 +33,7 @@ module.exports = {
       if (hashpass.toString() !== resultUname[0].password) {
         return res.status(400).send("invalid password.");
       }
-      res.status(200).send(resultUname);
+      res.status(200).send(resultUname[0]);
     } catch (err) {
       // console.log(err)
       return res.status(500).send(err);
