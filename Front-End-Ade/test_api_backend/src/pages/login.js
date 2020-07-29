@@ -22,7 +22,7 @@ class Login extends React.Component {
 }
 
   render() {
-    if (this.props.username){return <Redirect to='/products'/>} //kalo login username sudah disimpan, jadi langsung redirect to page products
+    if (this.props.username){return <Redirect to='/'/>} //kalo login username sudah disimpan, jadi langsung redirect to page products
     return (
         <div className="login-container">
         <h1>Login</h1>

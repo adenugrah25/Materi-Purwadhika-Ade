@@ -3,9 +3,9 @@ const CryptoJS = require("crypto-js");
 const { validationResult } = require("express-validator");
 const database = require("../database");
 const { secretKey } = require("../helpers/keys");
-const { generateQuery } = require("../helpers/queryHelp");
+const { generateQuery, asyncQuery } = require("../helpers/queryHelp");
 const util = require("util");
-const asyncQuery = util.promisify(database.query).bind(database);
+// const asyncQuery = util.promisify(database.query).bind(database);
 
 module.exports = {
   getUserData: async (req, res) => {
