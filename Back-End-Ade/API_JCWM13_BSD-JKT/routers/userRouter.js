@@ -1,6 +1,7 @@
 // import module
 const router = require('express').Router()
 const { validator, validatePassword } = require('../helpers/validator')
+const { verify } = require('../helpers/jwt')
 
 // import controller
 const { userController } = require('../controllers')
@@ -12,6 +13,7 @@ router.post('/register', validator, userController.register)
 router.delete('/users/:id', userController.delete)
 router.patch('/users/:id', userController.edit)
 router.patch('/users/pass/:id', validatePassword, userController.editPass)
+router.post('/users/keeplogin', verify, userController.keeplogin)
 
 // export router
 module.exports = router

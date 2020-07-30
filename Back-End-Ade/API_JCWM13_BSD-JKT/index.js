@@ -2,9 +2,11 @@
 const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
+const dotenv = require('dotenv')
 
 // create app
 const app = express()
+dotenv.config() //pakainya setelah express
 
 // apply middleware
 app.use(cors())

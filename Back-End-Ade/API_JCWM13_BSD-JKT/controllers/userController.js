@@ -2,10 +2,12 @@
 const CryptoJS = require("crypto-js");
 const { validationResult } = require("express-validator");
 const database = require("../database");
-const { secretKey } = require("../helpers/keys");
 const { generateQuery, asyncQuery } = require("../helpers/queryHelp");
 const util = require("util");
 // const asyncQuery = util.promisify(database.query).bind(database);
+const { createToken } = require('../helpers/jwt')
+
+const SECRET_KEY = process.env.SECRET_KEY
 
 module.exports = {
   getUserData: async (req, res) => {
@@ -29,10 +31,21 @@ module.exports = {
       }
 
       //check password : password form user vs password form database
-      const hashpass = CryptoJS.HmacMD5(password, secretKey);
+      const hashpass = CryptoJS.HmacMD5(password, SECRET_KEY);
       if (hashpass.toString() !== resultUname[0].password) {
         return res.status(400).send("invalid password.");
       }
+
+      // filter data
+      delete resultUname[0].password
+
+      // create user token
+      const token = createToken({ id : resultUname[0].user_id, username : resultUname[0].username })
+      console.log('token : ', token)
+
+      // include token in result
+      resultUname[0].token = token
+
       res.status(200).send(resultUname[0]);
     } catch (err) {
       // console.log(err)
@@ -63,7 +76,7 @@ module.exports = {
       }
 
       // encypt password before insert into database
-      const hashpass = CryptoJS.HmacMD5(password, secretKey);
+      const hashpass = CryptoJS.HmacMD5(password, SECRET_KEY);
       const query = `INSERT INTO users (username, password, email, role)
                         values ('${username}', '${hashpass.toString()}', '${email}', 'user')`;
       const resultQuery = await asyncQuery(query);
@@ -88,7 +101,7 @@ module.exports = {
       }
 
       // check password
-      const hashpass = CryptoJS.HmacMD5(password, secretKey);
+      const hashpass = CryptoJS.HmacMD5(password, SECRET_KEY);
       if (hashpass.toString() !== resultCheckID[0].password) {
         return res.status(400).send("invalid password.");
       }
@@ -229,13 +242,13 @@ module.exports = {
         const checkPass = `SELECT password FROM users WHERE user_id=${id}`;
         const resultCheckPass = await asyncQuery(checkPass);
 
-        const hasholdpass = CryptoJS.HmacMD5(oldpass, secretKey);
+        const hasholdpass = CryptoJS.HmacMD5(oldpass, SECRET_KEY);
         if (hasholdpass.toString() !== resultCheckPass[0].password) {
             return res.status(400).send("invalid password.");
         }
 
         // update password
-        const hashpass = CryptoJS.HmacMD5(newpass, secretKey);
+        const hashpass = CryptoJS.HmacMD5(newpass, SECRET_KEY);
         const updatePass = `UPDATE users SET password='${hashpass}' WHERE user_id=${id}`;
         const resultUpdatePass = await asyncQuery(updatePass)
         // send response to user
@@ -245,6 +258,22 @@ module.exports = {
       return res.status(500).send(err);
     }
   },
+  keeplogin : async (req, res) => {
+    console.log('user : ', req.user)
+    try {
+        // query to get user's data
+        const query = `SELECT user_id, username, email, role 
+                    FROM users 
+                    WHERE user_id=${req.user.id} AND username='${req.user.username}'`
+        const result = await asyncQuery(query)
+        console.log('result : ', result)
+
+        res.status(200).send(result[0])
+    } catch (err) {
+        res.status(500).send(err)
+    }
+
+  }
   //   editPass: (req, res) => {
   //     console.log("params : ", req.params);
   //     console.log("body : ", req.body);
