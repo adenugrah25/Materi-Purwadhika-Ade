@@ -1,3 +1,1 @@
-module.exports = {
-    secretKey : '!_$@gdj'
-}
+// liat di notepad

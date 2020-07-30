@@ -7,6 +7,7 @@ const util = require("util");
 // const asyncQuery = util.promisify(database.query).bind(database);
 const { createToken } = require('../helpers/jwt')
 
+
 const SECRET_KEY = process.env.SECRET_KEY
 
 module.exports = {
@@ -53,12 +54,13 @@ module.exports = {
     }
   },
   register: async (req, res) => {
-    const { username, password, confpassword, email } = req.body;
+    console.log('body : ', req.body)
+    const { username, email, password, confpassword } = req.body;
     try {
       // validate user input
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(422).send({ errors: errors.array() });
+        return res.status(422).send({ errors: errors.array()[0].msg});
       }
 
       // check password

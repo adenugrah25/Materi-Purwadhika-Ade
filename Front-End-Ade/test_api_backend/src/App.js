@@ -7,6 +7,7 @@ import Product from './pages/products'
 import ProductCategory from './pages/productCategory'
 import Category from './pages/category'
 import Login from './pages/login'
+import Register from './pages/register'
 
 import { Route } from 'react-router-dom'
 
@@ -25,7 +26,7 @@ class App extends React.Component {
         <Route path = '/category' component={Category}/>
         <Route path = '/product-category' component={ProductCategory}/>
         <Route path = '/login' component={Login} />
-        {/* <Product/> */}
+        <Route path = '/register' component={Register} />
       </div>
     );
   }

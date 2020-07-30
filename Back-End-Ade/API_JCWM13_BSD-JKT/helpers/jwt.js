@@ -10,6 +10,11 @@ module.exports = {
     verify : (req, res, next) => {
         const token = req.body.token
 
+        //check token
+        if(!token) {
+            return res.status(400).send('no token')
+        }
+
         try {
             //verify token
             const result = jwt.verify(token, TOKEN_KEY)
