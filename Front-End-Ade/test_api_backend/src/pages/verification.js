@@ -12,7 +12,7 @@ class Verification extends React.Component {
          }
     }
 
-    async componentWillMount () {
+    async componentDidMount () {
         const token = this.props.location.search.substring(1)
         try {
             const res = await Axios.post(URL + '/users/verification', { token })

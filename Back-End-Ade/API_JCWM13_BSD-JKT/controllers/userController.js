@@ -75,6 +75,7 @@ module.exports = {
   },
   register: async (req, res) => {
     console.log("body : ", req.body);
+    console.log(`TOKEN GMAIL :`, TOKEN_GMAIL)
     const { username, email, password, confpassword } = req.body;
     try {
       // validate user input
@@ -111,7 +112,7 @@ module.exports = {
 
       //create token
       const token = createToken({ id: new_userId, username: username });
-
+      
       // send email verification to user
       const option = {
         from: `admin <notyourlocaldrive@gmail.com>`,
