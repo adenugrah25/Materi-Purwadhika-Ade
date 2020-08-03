@@ -9,7 +9,9 @@ class Home extends React.Component {
     render() { 
         return ( 
             <div>
-            <h1>welcome</h1>
+            <Link to='/products'>
+                    <Button>Go to Products</Button>
+            </Link>
             </div>
          );
     }

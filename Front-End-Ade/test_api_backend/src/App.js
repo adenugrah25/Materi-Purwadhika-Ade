@@ -8,6 +8,7 @@ import ProductCategory from './pages/productCategory'
 import Category from './pages/category'
 import Login from './pages/login'
 import Register from './pages/register'
+import Verification from './pages/verification'
 
 import { Route } from 'react-router-dom'
 
@@ -27,6 +28,7 @@ class App extends React.Component {
         <Route path = '/product-category' component={ProductCategory}/>
         <Route path = '/login' component={Login} />
         <Route path = '/register' component={Register} />
+        <Route path = '/verification' component={Verification} />
       </div>
     );
   }

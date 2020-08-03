@@ -1,14 +1,30 @@
 // import database
 const CryptoJS = require("crypto-js");
 const { validationResult } = require("express-validator");
+// const nodemailer = require('nodemailer')
 const database = require("../database");
 const { generateQuery, asyncQuery } = require("../helpers/queryHelp");
 const util = require("util");
 // const asyncQuery = util.promisify(database.query).bind(database);
-const { createToken } = require('../helpers/jwt')
+const { createToken } = require("../helpers/jwt");
+const { info } = require("console");
+const transporter = require("../helpers/nodemailer");
 
+const SECRET_KEY = process.env.SECRET_KEY;
+const TOKEN_GMAIL = process.env.TOKEN_GMAIL;
 
-const SECRET_KEY = process.env.SECRET_KEY
+// //setup nodemailer
+// //transporter adalah fungsi yg mengirim email
+// const transporter = nodemailer.createTransport({
+//   service : 'gmail',
+//   auth : {
+//     user : 'notyourlocaldrive@gmail.com',
+//     pass : TOKEN_GMAIL
+//   },
+//   tls : {
+//     rejectUnauthorized : true
+//   }
+// })
 
 module.exports = {
   getUserData: async (req, res) => {
@@ -18,6 +34,7 @@ module.exports = {
       // console.log(result)
       res.status(200).send(resultDataUser);
     } catch (err) {
+      console.log(err);
       res.status(500).send(err);
     }
   },
@@ -38,29 +55,32 @@ module.exports = {
       }
 
       // filter data
-      delete resultUname[0].password
+      delete resultUname[0].password;
 
       // create user token
-      const token = createToken({ id : resultUname[0].user_id, username : resultUname[0].username })
-      console.log('token : ', token)
+      const token = createToken({
+        id: resultUname[0].user_id,
+        username: resultUname[0].username,
+      });
+      console.log("token : ", token);
 
       // include token in result
-      resultUname[0].token = token
+      resultUname[0].token = token;
 
       res.status(200).send(resultUname[0]);
     } catch (err) {
-      // console.log(err)
+      console.log(err);
       return res.status(500).send(err);
     }
   },
   register: async (req, res) => {
-    console.log('body : ', req.body)
+    console.log("body : ", req.body);
     const { username, email, password, confpassword } = req.body;
     try {
       // validate user input
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(422).send({ errors: errors.array()[0].msg});
+        return res.status(422).send({ errors: errors.array()[0].msg });
       }
 
       // check password
@@ -79,13 +99,37 @@ module.exports = {
 
       // encypt password before insert into database
       const hashpass = CryptoJS.HmacMD5(password, SECRET_KEY);
-      const query = `INSERT INTO users (username, password, email, role)
-                        values ('${username}', '${hashpass.toString()}', '${email}', 'user')`;
-      const resultQuery = await asyncQuery(query);
+      const insertUser = `INSERT INTO users (username, password, email, role, status)
+                          values ('${username}', '${hashpass.toString()}', '${email}', 'user', 0)`;
+      const resultQuery = await asyncQuery(insertUser);
 
-      // send response to user
-      res.status(200).send(resultQuery);
+      const new_userId = resultQuery.insertId;
+      // insert new profile to database
+      const insertProfile = `INSERT INTO profile (user_id) values (${new_userId})`;
+      const newProfile = await asyncQuery(insertProfile);
+      // res.status(200).send(resultQuery2nd);
+
+      //create token
+      const token = createToken({ id: new_userId, username: username });
+
+      // send email verification to user
+      const option = {
+        from: `admin <notyourlocaldrive@gmail.com>`,
+        to: `zoomade25@gmail.com`,
+        subject: `Email Verification`,
+        text: "",
+        html: `<h3>Click link below to verified your account</h3>
+        <a href="http://localhost:3000/verification?${token}">http://localhost:3000/verification?${token}</a>`,
+      };
+
+      // transporter.sendMail(option, (info) => {
+      //   res.status(200).send(info.response);
+      // })
+
+      const info = await transporter.sendMail(option);
+      res.status(200).send(info.response);
     } catch (err) {
+      console.log(err);
       return res.status(500).send(err);
     }
   },
@@ -115,6 +159,7 @@ module.exports = {
       // send result to user
       res.status(200).send(resultDelAcc);
     } catch (err) {
+      console.log(err);
       return res.status(500).send(err);
     }
   },
@@ -234,48 +279,59 @@ module.exports = {
         return res.status(400).send("password doesn't match.");
       }
 
-       // check new password requirement
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(422).send({ errors: errors.array() });
-        }
+      // check new password requirement
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).send({ errors: errors.array() });
+      }
 
-        // check password
-        const checkPass = `SELECT password FROM users WHERE user_id=${id}`;
-        const resultCheckPass = await asyncQuery(checkPass);
+      // check password
+      const checkPass = `SELECT password FROM users WHERE user_id=${id}`;
+      const resultCheckPass = await asyncQuery(checkPass);
 
-        const hasholdpass = CryptoJS.HmacMD5(oldpass, SECRET_KEY);
-        if (hasholdpass.toString() !== resultCheckPass[0].password) {
-            return res.status(400).send("invalid password.");
-        }
+      const hasholdpass = CryptoJS.HmacMD5(oldpass, SECRET_KEY);
+      if (hasholdpass.toString() !== resultCheckPass[0].password) {
+        return res.status(400).send("invalid password.");
+      }
 
-        // update password
-        const hashpass = CryptoJS.HmacMD5(newpass, SECRET_KEY);
-        const updatePass = `UPDATE users SET password='${hashpass}' WHERE user_id=${id}`;
-        const resultUpdatePass = await asyncQuery(updatePass)
-        // send response to user
-        res.status(200).send(resultUpdatePass);
-
+      // update password
+      const hashpass = CryptoJS.HmacMD5(newpass, SECRET_KEY);
+      const updatePass = `UPDATE users SET password='${hashpass}' WHERE user_id=${id}`;
+      const resultUpdatePass = await asyncQuery(updatePass);
+      // send response to user
+      res.status(200).send(resultUpdatePass);
     } catch (err) {
       return res.status(500).send(err);
     }
   },
-  keeplogin : async (req, res) => {
-    console.log('user : ', req.user)
+  keeplogin: async (req, res) => {
+    console.log("user : ", req.user);
     try {
-        // query to get user's data
-        const query = `SELECT user_id, username, email, role 
-                    FROM users 
-                    WHERE user_id=${req.user.id} AND username='${req.user.username}'`
-        const result = await asyncQuery(query)
-        console.log('result : ', result)
+      // query to get user's data
+      const queryKeepLogin  = `SELECT user_id, username, email, role FROM users 
+                              WHERE user_id=${req.user.id} AND username='${req.user.username}'`;
+      const resultKeepLogin = await asyncQuery(queryKeepLogin);
+      console.log("resultkeeplogin : ", resultKeepLogin);
 
-        res.status(200).send(result[0])
+      res.status(200).send(resultKeepLogin[0]);
     } catch (err) {
-        res.status(500).send(err)
+      res.status(500).send(err);
     }
+  },
+  emailverification: async (req, res) => {
+    console.log("user : ", req.user);
+    try {
+      // change status user in database
+      const queryUpdateStatusUser = `UPDATE users SET status = 1 WHERE user_id = ${req.user.id} AND username = '${req.user.username}'`;
+      const resultVerif = await asyncQuery(queryUpdateStatusUser);
+      console.log('result verification : ', resultVerif);
 
-  }
+      res.status(200).send("Email has been verified.");
+    } catch (err) {
+      console.log(err);
+      res.status(500).send(err);
+    }
+  },
   //   editPass: (req, res) => {
   //     console.log("params : ", req.params);
   //     console.log("body : ", req.body);

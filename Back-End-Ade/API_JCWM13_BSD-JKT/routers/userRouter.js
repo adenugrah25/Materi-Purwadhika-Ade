@@ -14,6 +14,7 @@ router.delete('/users/:id', userController.delete)
 router.patch('/users/:id', userController.edit)
 router.patch('/users/pass/:id', validatePassword, userController.editPass)
 router.post('/users/keeplogin', verify, userController.keeplogin)
+router.post('/users/verification', verify, userController.emailverification)
 
 // export router
 module.exports = router
