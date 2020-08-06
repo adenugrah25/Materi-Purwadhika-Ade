@@ -7,6 +7,8 @@
 // reject => error => .catch(error)
 // karena process asynchrounous => tidak prioritaskan
 
+const { generateQuery } = require("./helpers/queryHelp")
+
 // Axios.get()
 // console.log()
 
@@ -84,3 +86,14 @@ console.log(`insert into product_category values ${str.slice(0,-1)}`)
 let qry = []
 category_id.forEach(item => qry.push([parent_id, item.id]))
 console.log(qry)
+
+generateQuery : (body) => {
+    let result = ''
+    for (let key in body) {
+        result += `${key} = '${body[key]}',`
+    }
+    return result.slice(0, -1)
+}
+console.log(generateQuery({
+    username : 'corona2020'
+}))
